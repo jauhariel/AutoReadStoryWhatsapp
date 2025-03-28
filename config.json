@@ -3,6 +3,7 @@
     "downloadMediaStatus": false,
     "sensorNomor": true,
     "antiTelpon": false,
+    "autoKickStory": false,
     "blackList": [
         "628987654321",
         "628123456789"
