@@ -31,6 +31,7 @@ const configPath = path.join(__dirname, "config.json");
 let config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
 let {
+  autoReadStatus,
   autoLikeStatus,
   downloadMediaStatus,
   sensorNomor,
@@ -166,10 +167,12 @@ async function connectToWhatsApp() {
 Kamu berhasil login dengan nomor: ${displayedLoggedInNumber}
 
 info status fitur:
+- Auto Read Status: ${autoReadStatus ? "*Aktif*" : "*Nonaktif*"}
 - Auto Like Status: ${autoLikeStatus ? "*Aktif*" : "*Nonaktif*"}
 - Download Media Status: ${downloadMediaStatus ? "*Aktif*" : "*Nonaktif*"}
 - Sensor Nomor: ${sensorNomor ? "*Aktif*" : "*Nonaktif*"}
 - Anti Telpon: ${antiTelpon ? "*Aktif*" : "*Nonaktif*"}
+- Auto Kick tag Story: ${autoKickStory ? "*Aktif*" : "*Nonaktif*"}
 
 Ketik *#menu* untuk melihat menu perintah yang tersedia.
 
@@ -293,12 +296,22 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
             ? await sock.sendMessage(
                 `${loggedInNumber}@s.whatsapp.net`,
                 {
-                  text: `mana argumennya ?\ncontoh ketik : \`#on autolike\`\n\nArgumen yang tersedia:\n\n\`#on autolike\`\nuntuk mengaktifkan fitur autolike\n\n\`#on dlmedia\`\nuntuk mengaktifkan fitur download media(foto,video, dan audio) dari story\n\n\`#on sensornomor\`\nuntuk mengaktifkan sensor nomor\n\n\`#on antitelpon\`\nuntuk mengaktifkan anti-telpon\n\n\`#on kickstory\`\nuntuk mengaktifkan auto kick story grup`,
+                  text: `mana argumennya ?\ncontoh ketik : \`#on autolike\`\n\nArgumen yang tersedia:\n\n\`#on autoread\`\nuntuk mengaktifkan fitur autoread story\n\n\`#on autolike\`\nuntuk mengaktifkan fitur autolike story\n\n\`#on dlmedia\`\nuntuk mengaktifkan fitur download media(foto,video, dan audio) dari story\n\n\`#on sensornomor\`\nuntuk mengaktifkan sensor nomor\n\n\`#on antitelpon\`\nuntuk mengaktifkan anti-telpon\n\n\`#on kickstory\`\nuntuk mengaktifkan auto kick story grup`,
                 },
                 { quoted: msg }
               )
             : msg.args.forEach(async (arg) => {
                 switch (arg.trim().toLowerCase()) {
+                  case "autoread":
+                    autoReadStatus = true;
+                    updateConfig("autoReadStatus", true);
+                    logCuy("Kamu mengaktifkan fitur Auto Read Status", "blue");
+                    await sock.sendMessage(
+                      `${loggedInNumber}@s.whatsapp.net`,
+                      { text: "Auto Read Status aktif" },
+                      { quoted: msg }
+                    );
+                    break;
                   case "autolike":
                     autoLikeStatus = true;
                     updateConfig("autoLikeStatus", true);
@@ -359,7 +372,7 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `Argumen tidak valid: ${arg}. Pilihan yang tersedia: autolike, dlmedia, sensornomor, kickstory dan antitelpon`,
+                        text: `Argumen tidak valid: ${arg}. Pilihan yang tersedia: autoread, autolike, dlmedia, sensornomor, kickstory dan antitelpon`,
                       },
                       { quoted: msg }
                     );
@@ -372,12 +385,22 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
             ? await sock.sendMessage(
                 `${loggedInNumber}@s.whatsapp.net`,
                 {
-                  text: `mana argumennya ?\ncontoh ketik : \`#off autolike\`\n\nArgumen yang tersedia:\n\n\`#off autolike\`\nuntuk menonaktifkan fitur autolike\n\n\`#off dlmedia\`\nuntuk menonaktifkan fitur download media(foto,video, dan audio) dari story\n\n\`#off sensornomor\`\nuntuk menonaktifkan sensor nomor\n\n\`#off antitelpon\`\nuntuk menonaktifkan anti-telpon\n\n\`#off kickstory\`\nuntuk menonaktifkan auto kick story grup`,
+                  text: `mana argumennya ?\ncontoh ketik : \`#off autolike\`\n\nArgumen yang tersedia:\n\n\`#off autoread\`\nuntuk menonaktifkan fitur autoread story\n\n\`#off autolike\`\nuntuk menonaktifkan fitur autolike story\n\n\`#off dlmedia\`\nuntuk menonaktifkan fitur download media(foto,video, dan audio) dari story\n\n\`#off sensornomor\`\nuntuk menonaktifkan sensor nomor\n\n\`#off antitelpon\`\nuntuk menonaktifkan anti-telpon\n\n\`#off kickstory\`\nuntuk menonaktifkan auto kick story grup`,
                 },
                 { quoted: msg }
               )
             : msg.args.forEach(async (arg) => {
                 switch (arg.trim().toLowerCase()) {
+                  case "autoread":
+                    autoReadStatus = false;
+                    updateConfig("autoReadStatus", false);
+                    logCuy("Kamu mematikan fitur Auto Read Status", "blue");
+                    await sock.sendMessage(
+                      `${loggedInNumber}@s.whatsapp.net`,
+                      { text: "Auto Read Status nonaktif" },
+                      { quoted: msg }
+                    );
+                    break;
                   case "autolike":
                     autoLikeStatus = false;
                     updateConfig("autoLikeStatus", false);
@@ -438,7 +461,7 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `Argumen tidak valid: ${arg}. Pilihan yang tersedia: autolike, dlmedia, sensornomor, kickstory dan antitelpon`,
+                        text: `Argumen tidak valid: ${arg}. Pilihan yang tersedia: autoread, autolike, dlmedia, sensornomor, kickstory dan antitelpon`,
                       },
                       { quoted: msg }
                     );
@@ -738,8 +761,11 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
 contoh penggunaan: #on autolike
 
 Perintah On:
+\`#on autoread\`
+Mengaktifkan fitur autoread story
+
 \`#on autolike\`
-Mengaktifkan fitur autolike
+Mengaktifkan fitur autolike story
 
 \`#on dlmedia\`
 Mengaktifkan fitur download media (foto, video, dan audio) dari story
@@ -754,8 +780,11 @@ Mengaktifkan anti telpon
 Mengaktifkan auto kick story tag grup
 
 Perintah Off:
+\`#off autoread\`
+Menonaktifkan fitur autoread story
+
 \`#off autolike\`
-Menonaktifkan fitur autolike
+Menonaktifkan fitur autolike story
 
 \`#off dlmedia\`
 Menonaktifkan fitur download media (foto, video, dan audio) dari story
@@ -918,10 +947,12 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
           break;
         case "info":
           const infoMessage = `Informasi Status Fitur:
+- Auto Read Status: ${autoReadStatus ? "*Aktif*" : "*Nonaktif*"}
 - Auto Like Status: ${autoLikeStatus ? "*Aktif*" : "*Nonaktif*"}
 - Download Media Status: ${downloadMediaStatus ? "*Aktif*" : "*Nonaktif*"}
 - Sensor Nomor: ${sensorNomor ? "*Aktif*" : "*Nonaktif*"}
-- Anti Telpon: ${antiTelpon ? "*Aktif*" : "*Nonaktif*"}`;
+- Anti Telpon: ${antiTelpon ? "*Aktif*" : "*Nonaktif*"}
+- Auto Kick tag Story: ${autoKickStory ? "*Aktif*" : "*Nonaktif*"}`;
 
           const formatList = (list) =>
             list
@@ -1010,7 +1041,8 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
     // status
     if (
       msg.key.remoteJid === "status@broadcast" &&
-      msg.key.participant !== `${loggedInNumber}@s.whatsapp.net`
+      msg.key.participant !== `${loggedInNumber}@s.whatsapp.net` &&
+      autoReadStatus
     ) {
       let senderNumber = msg.key.participant
         ? msg.key.participant.split("@")[0]

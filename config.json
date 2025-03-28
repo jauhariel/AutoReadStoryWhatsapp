@@ -1,4 +1,5 @@
 {
+    "autoReadStatus": true,
     "autoLikeStatus": true,
     "downloadMediaStatus": false,
     "sensorNomor": true,
