@@ -23,6 +23,7 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
 6. **Blacklist**: Mengatur hanya nomor tertentu yang statusnya tidak akan dilihat.
 7. **Whitelist**: Mengatur hanya nomor tertentu yang statusnya akan dilihat.
 8. **Emojis**: Mengatur emoji yang digunakan untuk menyukai status.
+9. **View Once**: Mengambil/mendownload foto, video, audio dari pesan yang hanya dapat dilihat sekali.
 
 ## Instalasi :
 

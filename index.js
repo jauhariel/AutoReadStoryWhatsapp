@@ -63,7 +63,6 @@ async function connectToWhatsApp() {
     keepAliveIntervalMs: 30000,
     browser: Browsers.macOS("Chrome"),
     shouldSyncHistoryMessage: () => true,
-    markOnlineOnConnect: true,
     syncFullHistory: true,
     generateHighQualityLinkPreview: true,
   });
@@ -222,6 +221,24 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
         : msg.type === "extendedTextMessage"
         ? msg.message.extendedTextMessage.text
         : msg.message[msg.type]?.caption || "";
+
+    msg.isQuoted =
+      msg.type === "extendedTextMessage"
+        ? msg.message.extendedTextMessage.contextInfo?.quotedMessage
+        : msg.type === "imageMessage"
+        ? msg.message.imageMessage.contextInfo?.quotedMessage
+        : msg.type === "videoMessage"
+        ? msg.message.videoMessage.contextInfo?.quotedMessage
+        : msg.type === "audioMessage"
+        ? msg.message.audioMessage.contextInfo?.quotedMessage
+        : null;
+
+    msg.quoted = msg.isQuoted
+      ? msg.message.extendedTextMessage?.contextInfo ||
+        msg.message.imageMessage?.contextInfo ||
+        msg.message.videoMessage?.contextInfo ||
+        msg.message.audioMessage?.contextInfo
+      : null;
 
     const prefixes = [".", "#", "!", "/"];
     let prefix = prefixes.find((p) => msg.text.startsWith(p));
@@ -774,13 +791,130 @@ Menghapus emoji dari daftar emojis
 
 Perintah Info:
 \`#info\`
-Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, whitelist dan emojis`;
+Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, whitelist dan emojis
+
+Perintah Viewonce:
+\`#viewonce\`
+Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang kamu reply
+`;
 
           await sock.sendMessage(
             `${loggedInNumber}@s.whatsapp.net`,
             { text: menuMessage },
             { quoted: msg }
           );
+          break;
+        case "viewonce":
+          if (msg.isQuoted && msg.quoted && msg.quoted.quotedMessage) {
+            if (msg.quoted.quotedMessage.imageMessage) {
+              let buffer = await downloadMediaMessage(
+                {
+                  message: {
+                    imageMessage: msg.quoted.quotedMessage.imageMessage,
+                  },
+                  key: msg.quoted.key,
+                },
+                "buffer",
+                {},
+                {
+                  logger: pino({ level: "fatal" }),
+                }
+              );
+
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                {
+                  image: Buffer.from(buffer),
+                },
+                { quoted: msg }
+              );
+
+              logCuy(
+                `Berhasil mengambil gambar sekali liat dari yang kamu reply`,
+                "blue"
+              );
+
+              buffer = null;
+            } else if (msg.quoted.quotedMessage.videoMessage) {
+              let buffer = await downloadMediaMessage(
+                {
+                  message: {
+                    videoMessage: msg.quoted.quotedMessage.videoMessage,
+                  },
+                  key: msg.quoted.key,
+                },
+                "buffer",
+                {},
+                {
+                  logger: pino({ level: "fatal" }),
+                }
+              );
+
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                {
+                  video: Buffer.from(buffer),
+                },
+                { quoted: msg }
+              );
+
+              logCuy(
+                `Berhasil mengambil video sekali liat dari yang kamu reply`,
+                "blue"
+              );
+
+              buffer = null;
+            } else if (msg.quoted.quotedMessage.audioMessage) {
+              let buffer = await downloadMediaMessage(
+                {
+                  message: {
+                    audioMessage: msg.quoted.quotedMessage.audioMessage,
+                  },
+                  key: msg.quoted.key,
+                },
+                "buffer",
+                {},
+                {
+                  logger: pino({ level: "fatal" }),
+                }
+              );
+
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                {
+                  audio: Buffer.from(buffer),
+                },
+                { quoted: msg }
+              );
+
+              logCuy(
+                `Berhasil mengambil audio sekali liat dari yang kamu reply`,
+                "blue"
+              );
+
+              buffer = null;
+            } else {
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                {
+                  text: `Pesan yang kamu reply bukan pesan yang bertipe foto, video, audio dan sekali liat`,
+                },
+                { quoted: msg }
+              );
+              logCuy(
+                `Pesan yang kamu reply bukan pesan yang bertipe foto, video, audio dan sekali liat`,
+                "yellow"
+              );
+            }
+          } else {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              {
+                text: `Reply/balas pesan sekali liat dengan perintah #viewonce`,
+              },
+              { quoted: msg }
+            );
+          }
           break;
         case "info":
           const infoMessage = `Informasi Status Fitur:
@@ -954,7 +1088,7 @@ Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, wh
               }`;
 
               try {
-                const buffer = await downloadMediaMessage(
+                let buffer = await downloadMediaMessage(
                   msg,
                   "buffer",
                   {},
@@ -967,6 +1101,8 @@ Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, wh
                   [mediaType]: Buffer.from(buffer),
                   caption: `${messageContent} dengan caption : "*${caption}*"`,
                 });
+
+                buffer = null;
               } catch (error) {
                 logCuy(`Error uploading media: ${error}`, "red");
                 await sock.sendMessage(`${targetNumber}@s.whatsapp.net`, {
@@ -985,7 +1121,7 @@ Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, wh
               });
 
               try {
-                const buffer = await downloadMediaMessage(
+                let buffer = await downloadMediaMessage(
                   msg,
                   "buffer",
                   {},
@@ -998,6 +1134,8 @@ Menampilkan informasi status fitur, daftar nomor/emoji yang ada di blacklist, wh
                   audio: Buffer.from(buffer),
                   caption: "",
                 });
+
+                buffer = null;
               } catch (error) {
                 logCuy(`Error uploading media: ${error}`, "red");
                 await sock.sendMessage(`${targetNumber}@s.whatsapp.net`, {
