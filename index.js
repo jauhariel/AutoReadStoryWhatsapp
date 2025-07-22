@@ -106,7 +106,10 @@ async function connectToWhatsApp() {
                     );
                     askWaNumber();
                   } else {
-                    const code = await sock.requestPairingCode(waNumber);
+                    const code = await sock.requestPairingCode(
+                      waNumber,
+                      "AUTOREAD"
+                    );
                     console.log(
                       "\nCek notifikasi wangsafmu dan masukin kode login wangsaf:"
                         .blue.bold,
