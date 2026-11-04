@@ -1,4 +1,4 @@
-const {
+﻿const {
   makeWASocket,
   DisconnectReason,
   useMultiFileAuthState,
@@ -255,11 +255,7 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
     if (prefix && msg.key.fromMe) {
       msg.cmd = msg.text.trim().split(" ")[0].replace(prefix, "").toLowerCase();
 
-      // args
-      msg.args = msg.text
-        .replace(/^\S*\b/g, "")
-        .trim()
-        .split("|");
+      msg.args = msg.text.trim().replace(/^\S+/, "").trim().split("|");
 
       async function validateNumber(commandname, type, sc, data) {
         if (!data) {
@@ -487,22 +483,22 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
             : msg.args.forEach(async (arg) => {
                 const [list, data] = arg.trim().split(" ");
                 if (list === "emojis") {
-                  let emojiRegex = /^[\p{Emoji}\u200D\uFE0F]$/gu;
-                  if (!data) {
+                  const emojiSegments = data ? [...new Intl.Segmenter().segment(data)].map(s => s.segment) : [];
+                  if (!data || emojiSegments.length === 0) {
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `emoji harus diisi.\ncontoh ketik :\n\`#add emojis 👍\``,
+                        text: `emoji harus diisi.\ncontoh ketik :\n\`#add emojis ≡ƒæì\``,
                       },
                       { quoted: msg },
                     );
                     return;
                   }
-                  if (!emojiRegex.test(data)) {
+                  if (emojiSegments.length > 1) {
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `hanya boleh mengisi 1 emoji.\ncontoh ketik :\n\`#add emojis 👍\``,
+                        text: `hanya boleh mengisi 1 emoji.\ncontoh ketik :\n\`#add emojis ≡ƒæì\``,
                       },
                       { quoted: msg },
                     );
@@ -624,22 +620,22 @@ SC : https://github.com/jauhariel/AutoReadStoryWhatsapp`;
             : msg.args.forEach(async (arg) => {
                 const [list, data] = arg.trim().split(" ");
                 if (list === "emojis") {
-                  let emojiRegex = /^[\p{Emoji}\u200D\uFE0F]$/gu;
-                  if (!data) {
+                  const emojiSegments = data ? [...new Intl.Segmenter().segment(data)].map(s => s.segment) : [];
+                  if (!data || emojiSegments.length === 0) {
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `emoji harus diisi.\ncontoh ketik :\n\`#remove emojis 👍\``,
+                        text: `emoji harus diisi.\ncontoh ketik :\n\`#remove emojis ≡ƒæì\``,
                       },
                       { quoted: msg },
                     );
                     return;
                   }
-                  if (!emojiRegex.test(data)) {
+                  if (emojiSegments.length > 1) {
                     await sock.sendMessage(
                       `${loggedInNumber}@s.whatsapp.net`,
                       {
-                        text: `hanya boleh mengisi 1 emoji.\ncontoh ketik :\n\`#remove emojis 👍\``,
+                        text: `hanya boleh mengisi 1 emoji.\ncontoh ketik :\n\`#remove emojis ≡ƒæì\``,
                       },
                       { quoted: msg },
                     );
@@ -1005,7 +1001,17 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
         const participant =
           msg.key.participantAlt && !msg.key.participantAlt.includes("@lid")
             ? msg.key.participantAlt
-            : msg.key.participant;
+            : msg.key.participant && !msg.key.participant.includes("@lid")
+            ? msg.key.participant
+            : msg.key.participant || msg.key.participantAlt;
+
+        if (!participant) return;
+
+        let resolvedParticipant = participant;
+        if (participant.includes("@lid")) {
+          const pn = await sock.signalRepository.lidMapping.getPNForLID(participant).catch(() => null);
+          if (pn) resolvedParticipant = pn;
+        }
 
         const groupMetadata = await sock.groupMetadata(groupId);
         const groupName = groupMetadata.subject;
@@ -1019,14 +1025,14 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
             groupId,
             {
               text: `@${
-                participant.split("@")[0]
+                resolvedParticipant.split("@")[0]
               } terdeteksi tag grup di story, kamu akan dikick.`,
-              mentions: [participant],
+              mentions: [resolvedParticipant],
             },
             { quoted: msg },
           );
 
-          await sock.groupParticipantsUpdate(groupId, [participant], "remove");
+          await sock.groupParticipantsUpdate(groupId, [resolvedParticipant], "remove");
           logCuy(
             `Kamu mengeluarkan sesorang dari group ${groupName} karena telah tag grup di story.`,
             "red",
@@ -1050,74 +1056,103 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
     // status
     if (
       msg.key.remoteJid === "status@broadcast" &&
-      msg.key.remoteJidAlt !== `${loggedInNumber}@s.whatsapp.net` &&
       autoReadStatus
     ) {
-      let senderNumber = msg.key.remoteJidAlt
-        ? msg.key.remoteJidAlt.split("@")[0]
-        : "Tidak diketahui";
+      if (msg.message.reactionMessage) return;
+
+      if (msg.message.protocolMessage) {
+        logCuy(`Status dari ${msg.pushName || "?"} telah dihapus.`, "red");
+        return;
+      }
+
+      let senderJid =
+        (msg.key.participant && !msg.key.participant.includes("@lid") ? msg.key.participant : null) ||
+        (msg.key.participantAlt && !msg.key.participantAlt.includes("@lid") ? msg.key.participantAlt : null) ||
+        (msg.key.remoteJidAlt && !msg.key.remoteJidAlt.includes("@lid") ? msg.key.remoteJidAlt : null) ||
+        msg.key.participant ||
+        msg.key.participantAlt ||
+        msg.key.remoteJidAlt ||
+        null;
+
+      if (!senderJid) return;
+
+      const originalParticipant = msg.key.participant || msg.key.participantAlt || null;
+
+      if (senderJid.includes("@lid")) {
+        const pnJid = await sock.signalRepository.lidMapping.getPNForLID(senderJid).catch(() => null);
+        if (pnJid) senderJid = pnJid;
+      }
+
+      if (jidNormalizedUser(senderJid) === jidNormalizedUser(sock.user.id)) return;
+
+      let senderNumber = senderJid.split("@")[0].split(":")[0];
       let displaySendernumber = senderNumber;
       const senderName = msg.pushName || "Tidak diketahui";
 
-      if (sensorNomor && displaySendernumber !== "Tidak diketahui") {
+      if (sensorNomor) {
         displaySendernumber =
           displaySendernumber.slice(0, 3) +
           "****" +
           displaySendernumber.slice(-2);
       }
 
-      if (msg.message.protocolMessage) {
+      if (blackList.includes(senderNumber)) {
         logCuy(
-          `Status dari ${senderName} (${displaySendernumber}) telah dihapus.`,
-          "red",
+          `${senderName} (${displaySendernumber}) membuat status tapi karena ada di blacklist. Status tidak akan dilihat.`,
+          "yellow",
         );
-      } else if (!msg.message.reactionMessage) {
-        if (blackList.includes(senderNumber)) {
-          logCuy(
-            `${senderName} (${displaySendernumber}) membuat status tapi karena ada di blacklist. Status tidak akan dilihat.`,
-            "yellow",
+        return;
+      }
+
+      if (whiteList.length > 0 && !whiteList.includes(senderNumber)) {
+        logCuy(
+          `${senderName} (${displaySendernumber}) membuat status tapi karena tidak ada di whitelist. Status tidak akan dilihat.`,
+          "yellow",
+        );
+        return;
+      }
+
+      const myself = jidNormalizedUser(sock.user.id);
+      const emojiToReact = emojis[Math.floor(Math.random() * emojis.length)];
+
+      {
+        const receiptParticipant = originalParticipant || senderJid;
+        await sock.sendReceipt(msg.key.remoteJid, receiptParticipant, [msg.key.id], 'read');
+
+        if (autoLikeStatus) {
+          await sock.sendMessage(
+            msg.key.remoteJid,
+            {
+              react: {
+                key: {
+                  remoteJid: "status@broadcast",
+                  id: msg.key.id,
+                  participant: originalParticipant || senderJid,
+                  fromMe: false,
+                },
+                text: emojiToReact,
+              },
+            },
+            { statusJidList: [senderJid, myself] },
           );
-          return;
         }
 
-        if (whiteList.length > 0 && !whiteList.includes(senderNumber)) {
-          logCuy(
-            `${senderName} (${displaySendernumber}) membuat status tapi karena tidak ada di whitelist. Status tidak akan dilihat.`,
-            "yellow",
-          );
-          return;
-        }
+        logCuy(
+          `Berhasil melihat ${
+            autoLikeStatus ? "dan menyukai " : ""
+          }status dari: ${senderName} (${displaySendernumber})`,
+          "green",
+        );
 
-        const myself = jidNormalizedUser(sock.user.id);
-        const emojiToReact = emojis[Math.floor(Math.random() * emojis.length)];
-
-        if (msg.key.remoteJid && msg.key.remoteJidAlt) {
-          await sock.readMessages([msg.key]);
-
-          if (autoLikeStatus) {
-            await sock.sendMessage(
-              msg.key.remoteJid,
-              { react: { key: msg.key, text: emojiToReact } },
-              { statusJidList: [msg.key.remoteJidAlt, myself] },
-            );
-          }
-
-          logCuy(
-            `Berhasil melihat ${
-              autoLikeStatus ? "dan menyukai " : ""
-            }status dari: ${senderName} (${displaySendernumber})`,
-            "green",
-          );
-
-          const targetNumber = loggedInNumber;
-          let messageContent = `Status dari *${senderName}* (${displaySendernumber}) telah dilihat ${
-            autoLikeStatus ? "dan disukai" : ""
-          }`;
-          let caption =
-            msg.message.imageMessage?.caption ||
-            msg.message.videoMessage?.caption ||
-            msg.message.extendedTextMessage?.text ||
-            "Tidak ada caption";
+        const targetNumber = loggedInNumber;
+        let messageContent = `Status dari *${senderName}* (${displaySendernumber}) telah dilihat ${
+          autoLikeStatus ? "dan disukai" : ""
+        }`;
+        let caption =
+          msg.message.imageMessage?.caption ||
+          msg.message.videoMessage?.caption ||
+          msg.message.extendedTextMessage?.text ||
+          "Tidak ada caption";
 
           if (downloadMediaStatus) {
             if (msg.type === "imageMessage" || msg.type === "videoMessage") {
@@ -1192,13 +1227,8 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
                 text: messageContent,
               });
             }
-          } else {
-            await sock.sendMessage(`${targetNumber}@s.whatsapp.net`, {
-              text: messageContent,
-            });
           }
         }
-      }
     }
   });
 }
