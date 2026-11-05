@@ -28,6 +28,7 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
 9. **Emojis**: Mengatur emoji yang digunakan untuk menyukai status.
 10. **View Once**: Mengambil/mendownload foto, video, audio dari pesan yang hanya dapat dilihat sekali.
 11. **Multi Bahasa**: Mengubah bahasa pesan bot dan terminal dengan `#lang` (`id`/`en`).
+12. **Post Story**: Posting story/WhatsApp Status langsung dari bot — berupa teks, foto, video, atau audio. Bisa diposting ke semua kontak atau ke kontak tertentu saja. Kontak otomatis tersinkron dari HP kamu ke file `contacts.json`.
 
 ## Instalasi :
 
@@ -76,6 +77,26 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
    npm start
    ```
 6. Enjoy
+<hr>
+
+## Posting story dengan bot :
+
+Setelah login, bot akan otomatis mensinkronkan daftar kontak HP kamu ke file <strong>contacts.json</strong>. Tunggu sampai bot mengirim pemberitahuan "sinkronisasi kontak selesai" di chat, lalu kamu bisa memakai perintah berikut:
+
+1. **Post story berupa teks** — ketik di chat bot:
+   ```
+   #poststory halo semua 👋
+   ```
+2. **Post story foto/video** — kirim foto/video di chat bot dengan caption `#poststory` (bisa ditambah caption: `#poststory captionnya`), atau reply foto/video dengan perintah `#poststory`.
+3. **Post story audio** — reply pesan audio/voice note dengan perintah `#poststory`.
+4. **Post story ke kontak tertentu saja** — tambahkan daftar nomor setelah tanda `|`:
+   ```
+   #poststory halo | 628123456789,628987654321
+   ```
+   Story hanya akan terlihat oleh nomor yang kamu daftarkan (seperti fitur "Bagikan dengan kontak pilihanku" di WhatsApp). Tanpa daftar nomor, story terlihat oleh semua kontak yang tersinkron.
+5. **Cek daftar kontak** — ketik `#listkontak` untuk melihat jumlah kontak yang sudah tersinkron, atau `#listkontak budi` / `#listkontak 62812` untuk mencari kontak berdasarkan nama/nomor.
+
+Catatan: file <strong>contacts.json</strong> berisi daftar kontak pribadi kamu dan tidak akan ikut ter-push ke repository (sudah masuk .gitignore).
 <hr>
 
 ## Catatan

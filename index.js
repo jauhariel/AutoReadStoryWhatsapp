@@ -6,6 +6,8 @@
   jidNormalizedUser,
   downloadMediaMessage,
   fetchLatestBaileysVersion,
+  prepareWAMessageMedia,
+  generateWAMessageFromContent,
 } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const readline = require("readline");
@@ -13,6 +15,7 @@ const fs = require("fs");
 const path = require("path");
 const colors = require("colors");
 const moment = require("moment-timezone");
+const { randomBytes } = require("crypto");
 
 let useCode = true;
 let loggedInNumber;
@@ -59,6 +62,117 @@ const t = (key, ...args) => {
 };
 
 let welcomeMessage = false;
+
+// ===== kontak & post story =====
+const contactsPath = path.join(__dirname, "contacts.json");
+let contacts = {};
+
+// muat kontak tersimpan dari sesi sebelumnya
+if (fs.existsSync(contactsPath)) {
+  try {
+    contacts = JSON.parse(fs.readFileSync(contactsPath, "utf-8"));
+  } catch {
+    contacts = {};
+  }
+}
+
+let contactsSyncedNotified = false;
+
+const saveContacts = () => {
+  fs.writeFileSync(contactsPath, JSON.stringify(contacts, null, 4), "utf-8");
+};
+
+// kumpulkan kontak dari event baileys, hanya simpan nomor personal (@s.whatsapp.net)
+const collectContacts = (list) => {
+  let added = 0;
+  for (const c of list) {
+    if (!c || typeof c.id !== "string") continue;
+    const jid = c.id;
+    if (!jid.endsWith("@s.whatsapp.net")) continue;
+    if (jid.startsWith(`${loggedInNumber}@`)) continue;
+
+    const number = jid.split("@")[0].split(":")[0];
+    if (!number || !/^\d+$/.test(number)) continue;
+
+    const name = c.notify || c.name || c.verifiedName || c.username || null;
+    if (contacts[number]) {
+      // perbarui nama jika sebelumnya kosong
+      if (!contacts[number].name && name) {
+        contacts[number].name = name;
+        added++;
+      }
+    } else {
+      contacts[number] = { name };
+      added++;
+    }
+  }
+  if (added > 0) saveContacts();
+  return added;
+};
+
+// beri tahu sekali ke pemilik bot bahwa kontak sudah tersinkron
+const notifyContactsSynced = async (sock) => {
+  if (contactsSyncedNotified) return;
+  contactsSyncedNotified = true;
+  const count = Object.keys(contacts).length;
+  logCuy(t("contactsSyncedLog", count), "blue");
+  await sock
+    .sendMessage(`${loggedInNumber}@s.whatsapp.net`, {
+      text: t("contactsSynced", count),
+    })
+    .catch(() => {});
+};
+
+const statusPosterBusy = { value: false };
+
+// kirim pesan ke status/story: audio pakai sendMessage (sudah didukung),
+// media & teks pakai relayMessage + statusJidList (kontak tertentu)
+const postStatus = async (sock, content, statusJidList) => {
+  const options = { statusJidList: statusJidList || [] };
+
+  if (content.audio) {
+    // audio status dikirim langsung ke status@broadcast
+    return sock.sendMessage("status@broadcast", {
+      audio: content.audio,
+      ptt: true,
+      statusJidList: options.statusJidList,
+    });
+  }
+
+  let message;
+  if (content.text) {
+    // status teks (font & warna seperti di WhatsApp)
+    message = generateWAMessageFromContent(
+      "status@broadcast",
+      {
+        extendedTextMessage: {
+          text: content.text,
+          textArgb: content.textColor ?? 0,
+          backgroundArgb: content.backgroundColor ?? 0,
+          font: content.font ?? 0,
+        },
+      },
+      {},
+    );
+  } else {
+    // upload media lalu bungkus ke pesan status
+    const mediaType = content.image ? "image" : "video";
+    const prepared = await prepareWAMessageMedia(
+      { [mediaType]: content[mediaType], caption: content.caption },
+      { upload: sock.waUploadToServer, logger: pino({ level: "fatal" }) },
+    );
+    message = generateWAMessageFromContent("status@broadcast", prepared, {});
+  }
+
+  // WA memvalidasi status dengan messageSecret di messageContextInfo
+  message.message.messageContextInfo = {
+    ...(message.message.messageContextInfo || {}),
+    messageSecret: randomBytes(32),
+  };
+
+  await sock.relayMessage("status@broadcast", message.message, options);
+  return message.key.id;
+};
 
 async function connectToWhatsApp() {
   const sessionPath = path.join(__dirname, "sessions");
@@ -152,7 +266,7 @@ async function connectToWhatsApp() {
         connectToWhatsApp();
       } else {
         logCuy(t("loggedOut"), "red");
-        fs.rmdirSync(sessionPath, { recursive: true, force: true });
+        fs.rmSync(sessionPath, { recursive: true, force: true });
         connectToWhatsApp();
       }
     } else if (connection === "open") {
@@ -194,6 +308,31 @@ async function connectToWhatsApp() {
     }
   });
   sock.ev.on("creds.update", saveCreds);
+
+  // sync kontak dari history sync (daftar kontak hp) — dipanggil bertahap saat login
+  sock.ev.on("messaging-history.set", async ({ contacts: contactList }) => {
+    try {
+      const added = collectContacts(contactList || []);
+      if (added > 0) {
+        logCuy(t("contactsSavedLog", added, Object.keys(contacts).length), "cyan");
+      }
+      // history sync dianggap lengkap setelah progress 100% / isLatest
+      if (Object.keys(contacts).length > 0) {
+        await notifyContactsSynced(sock);
+      }
+    } catch (error) {
+      logCuy(`Error saving contacts: ${error}`, "red");
+    }
+  });
+
+  // kontak juga bisa datang dari push name (saat kontak ngirim pesan) — opsional
+  sock.ev.on("contacts.upsert", async (contactList) => {
+    try {
+      collectContacts(contactList || []);
+    } catch (error) {
+      logCuy(`Error saving contacts: ${error}`, "red");
+    }
+  });
 
   sock.ev.on("call", (call) => {
     const { id, status, from } = call[0];
@@ -905,6 +1044,214 @@ async function connectToWhatsApp() {
             { text: t("langChanged", lang) },
             { quoted: msg },
           );
+          break;
+        }
+        case "poststory": {
+          const totalContacts = Object.keys(contacts).length;
+
+          if (statusPosterBusy.value) {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryBusy") },
+              { quoted: msg },
+            );
+            break;
+          }
+
+          // pisahkan teks dan daftar nomor: #poststory teksnya | nomor1,nomor2
+          // segmen terakhir setelah | dianggap daftar nomor hanya jika ada angkanya
+          const rawText = msg.text.replace(/^\S+/, "").trim();
+          let segments = rawText.split("|").map((s) => s.trim());
+          let targetNums = [];
+          let invalidTarget = "";
+          if (segments.length > 1) {
+            const last = segments[segments.length - 1];
+            if (/\d/.test(last)) {
+              const nums = last
+                .split(",")
+                .map((n) => n.replace(/\D/g, ""))
+                .filter((n) => n.length > 5);
+              if (nums.length > 0) {
+                targetNums = nums;
+                segments = segments.slice(0, -1);
+              } else {
+                invalidTarget = last;
+              }
+            }
+          }
+          const contentText = segments.join(" | ").trim();
+
+          if (invalidTarget) {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryInvalidTarget", invalidTarget) },
+              { quoted: msg },
+            );
+            break;
+          }
+
+          // tentukan target: default semua kontak, atau nomor tertentu
+          let targetJids;
+          if (targetNums.length > 0) {
+            targetJids = targetNums.map((n) => `${n}@s.whatsapp.net`);
+          } else if (totalContacts === 0) {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryNoContacts") },
+              { quoted: msg },
+            );
+            break;
+          } else {
+            targetJids = Object.keys(contacts).map((n) => `${n}@s.whatsapp.net`);
+          }
+
+          // sumber konten: media yang dikirim/reply, audio yang direply, atau teks
+          let content = null;
+          const selfImage = msg.message.imageMessage;
+          const selfVideo = msg.message.videoMessage;
+          const quotedImage = msg.quoted?.quotedMessage?.imageMessage;
+          const quotedVideo = msg.quoted?.quotedMessage?.videoMessage;
+          const quotedAudio = msg.quoted?.quotedMessage?.audioMessage;
+
+          try {
+            if (selfImage || selfVideo) {
+              // foto/video yang dikirim langsung dengan caption #poststory
+              const buffer = await downloadMediaMessage(
+                msg,
+                "buffer",
+                {},
+                { logger: pino({ level: "fatal" }) },
+              );
+              content = {
+                [selfImage ? "image" : "video"]: Buffer.from(buffer),
+                caption: contentText || undefined,
+              };
+            } else if (quotedImage || quotedVideo) {
+              const buffer = await downloadMediaMessage(
+                {
+                  message: {
+                    [quotedImage ? "imageMessage" : "videoMessage"]:
+                      quotedImage || quotedVideo,
+                  },
+                  key: msg.quoted.key,
+                },
+                "buffer",
+                {},
+                { logger: pino({ level: "fatal" }) },
+              );
+              content = {
+                [quotedImage ? "image" : "video"]: Buffer.from(buffer),
+                caption: contentText || undefined,
+              };
+            } else if (quotedAudio) {
+              const buffer = await downloadMediaMessage(
+                {
+                  message: { audioMessage: quotedAudio },
+                  key: msg.quoted.key,
+                },
+                "buffer",
+                {},
+                { logger: pino({ level: "fatal" }) },
+              );
+              content = { audio: Buffer.from(buffer) };
+            } else if (contentText) {
+              content = { text: contentText };
+            }
+          } catch (error) {
+            logCuy(`Error downloading media: ${error}`, "red");
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryFail", error?.message || error) },
+              { quoted: msg },
+            );
+            break;
+          }
+
+          if (!content) {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryHelp") },
+              { quoted: msg },
+            );
+            break;
+          }
+
+          statusPosterBusy.value = true;
+          try {
+            await postStatus(sock, content, targetJids);
+            const kind = content.text
+              ? t("postStoryKindText")
+              : content.image
+                ? t("postStoryKindImage")
+                : content.audio
+                  ? t("postStoryKindAudio")
+                  : t("postStoryKindVideo");
+            logCuy(
+              t("postStorySuccessLog", kind, targetJids.length),
+              "green",
+            );
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStorySuccess", targetJids.length, totalContacts) },
+              { quoted: msg },
+            );
+          } catch (error) {
+            logCuy(`Error posting story: ${error}`, "red");
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryFail", error?.message || error) },
+              { quoted: msg },
+            );
+          } finally {
+            statusPosterBusy.value = false;
+          }
+          break;
+        }
+        case "listkontak": {
+          const totalContacts = Object.keys(contacts).length;
+          const searchArg = (msg.args[0] || "").trim().toLowerCase();
+
+          if (totalContacts === 0) {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("postStoryNoContacts") },
+              { quoted: msg },
+            );
+            break;
+          }
+
+          if (searchArg) {
+            // cari kontak berdasarkan nama atau nomor
+            const matches = Object.entries(contacts)
+              .filter(
+                ([number, c]) =>
+                  number.includes(searchArg.replace(/\D/g, "") || "\u0000") ||
+                  (c.name || "").toLowerCase().includes(searchArg),
+              )
+              .slice(0, 20);
+            if (matches.length === 0) {
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                { text: t("contactSearchEmpty", searchArg) },
+                { quoted: msg },
+              );
+            } else {
+              const listText = matches
+                .map(([number, c]) => `\u25CF ${c.name || "-"} : ${number}`)
+                .join("\n");
+              await sock.sendMessage(
+                `${loggedInNumber}@s.whatsapp.net`,
+                { text: t("contactSearchResult", searchArg, matches.length, listText) },
+                { quoted: msg },
+              );
+            }
+          } else {
+            await sock.sendMessage(
+              `${loggedInNumber}@s.whatsapp.net`,
+              { text: t("contactCount", totalContacts) },
+              { quoted: msg },
+            );
+          }
           break;
         }
       }

@@ -28,6 +28,7 @@ Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view
 9. **Emojis**: Configure the emojis used to like statuses.
 10. **View Once**: Retrieve/download photos, videos, and audio from view-once messages.
 11. **Multi-language**: Switch the bot & terminal language with `#lang` (`id`/`en`).
+12. **Post Story**: Post a WhatsApp Status/story directly from the bot — as text, photo, video, or audio. You can post it to all contacts or only to specific ones. Contacts are automatically synced from your phone into the `contacts.json` file.
 
 ## Installation :
 
@@ -76,6 +77,26 @@ Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view
    npm start
    ```
 6. Enjoy
+<hr>
+
+## Posting stories with the bot :
+
+After logging in, the bot automatically syncs your phone's contact list into the <strong>contacts.json</strong> file. Wait until the bot sends the "contact sync complete" notification in the chat, then you can use the following commands:
+
+1. **Post a text story** — type in the bot's chat:
+   ```
+   #poststory hello everyone 👋
+   ```
+2. **Post a photo/video story** — send a photo/video in the bot's chat with the caption `#poststory` (optionally with a caption: `#poststory your caption`), or reply to a photo/video with `#poststory`.
+3. **Post an audio story** — reply to an audio/voice message with `#poststory`.
+4. **Post a story to specific contacts only** — add a list of numbers after the `|` sign:
+   ```
+   #poststory hello | 628123456789,628987654321
+   ```
+   The story will only be visible to the numbers you listed (like WhatsApp's "Share with selected contacts" feature). Without a number list, the story is visible to all synced contacts.
+5. **Check your contacts** — type `#listkontak` to see how many contacts have been synced, or `#listkontak budi` / `#listkontak 62812` to search contacts by name/number.
+
+Note: the <strong>contacts.json</strong> file contains your private contact list and will not be pushed to the repository (it's in .gitignore).
 <hr>
 
 ## Notes

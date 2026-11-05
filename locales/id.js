@@ -184,6 +184,23 @@ Mengambil/download foto, video, audio dari pesan sementara/sekali liat dari yang
 Perintah Language:
 \`#lang en\`
 Mengubah bahasa pesan bot dan terminal (id/en)
+
+Perintah Story:
+\`#poststory teksnya\`
+Posting story berupa teks
+
+\`#poststory\` (reply foto/video)
+Posting story foto/video dari pesan yang kamu reply
+
+\`#poststory teks | nomor1,nomor2\`
+Posting story yang hanya bisa dilihat oleh nomor yang kamu daftarkan
+
+Perintah Kontak:
+\`#listkontak\`
+Menampilkan jumlah kontak yang sudah tersinkron ke bot
+
+\`#listkontak namanya\`
+Mencari kontak berdasarkan nama atau nomor
 `,
 
   // viewonce
@@ -225,6 +242,62 @@ Mengubah bahasa pesan bot dan terminal (id/en)
     `bahasa sekarang: *${current}*\ncontoh ketik :\n\`#lang id\` untuk bahasa Indonesia\n\`#lang en\` untuk English`,
   langChangedLog: (lang) => `Bahasa diubah ke: ${lang}`,
   langChanged: (lang) => `Bahasa berhasil diubah ke *${lang}*`,
+
+  // sync kontak
+  contactsSavedLog: (added, total) =>
+    `Tersinkron ${added} kontak baru (total ${total} kontak tersimpan di contacts.json)`,
+  contactsSyncedLog: (total) =>
+    `Sinkronisasi kontak selesai! ${total} kontak tersimpan. Fitur #poststory siap digunakan.`,
+  contactsSynced: (total) =>
+    `✅ Sinkronisasi kontak selesai!\n\n*${total}* kontak dari hp kamu sudah tersimpan di bot.\nSekarang kamu bisa posting story dengan perintah \`#poststory\`\n\nKetik \`#listkontak\` untuk mengecek daftar kontak.\nKetik \`#poststory\` untuk melihat cara pakai.`,
+
+  // #poststory
+  postStoryHelp: `Cara pakai *#poststory* :
+
+*1. Post story berupa teks :*
+\`#poststory halo semua\`
+
+*2. Post story foto/video :*
+Kirim foto/video di chat ini dengan caption \`#poststory\` atau reply foto/video dengan perintah \`#poststory\`
+(bisa ditambah caption : \`#poststory captionnya\`)
+
+*3. Post story audio :*
+Reply pesan audio/voice note dengan perintah \`#poststory\`
+
+*3. Post story ke kontak tertentu :*
+\`#poststory halo | 628123456789,628987654321\`
+
+Catatan :
+- Tanpa daftar nomor → story terlihat oleh semua kontak yang tersinkron
+- Dengan daftar nomor → story hanya terlihat oleh nomor yang kamu daftarkan
+- Ketik \`#listkontak\` untuk mengecek kontak yang sudah tersinkron`,
+  postStoryBusy:
+    "Masih ada proses posting story yang sedang berjalan, tunggu sebentar lagi ya.",
+  postStoryInvalidTarget: (arg) =>
+    `Format daftar nomor tidak valid: "${arg}"\ncontoh yang benar :\n\`#poststory halo | 628123456789,628987654321\``,
+  postStoryNoContacts:
+    "Daftar kontak belum tersinkron.\n\nTunggu beberapa saat setelah login sampai bot mengirim pemberitahuan \"sinkronisasi kontak selesai\", lalu coba lagi.\n\nKetik `#listkontak` untuk mengecek jumlah kontak yang sudah tersinkron.",
+  postStoryKindText: "teks",
+  postStoryKindImage: "foto",
+  postStoryKindVideo: "video",
+  postStoryKindAudio: "audio",
+  postStorySuccessLog: (kind, count) =>
+    `Berhasil posting story ${kind} ke ${count} kontak`,
+  postStorySuccess: (targetCount, totalContacts) =>
+    `✅ Story berhasil di-post ke *${targetCount}* kontak!${
+      targetCount < totalContacts
+        ? `\n(hanya nomor yang kamu daftarkan yang bisa melihat story ini)`
+        : `\n(semua kontak tersinkron dapat melihat story ini)`
+    }`,
+  postStoryFail: (err) => `❌ Gagal posting story :\n${err}`,
+
+  // #listkontak
+  contactCount: (total) =>
+    `📚 Total *${total}* kontak tersinkron di bot.\n\nKetik \`#listkontak namanya\` untuk mencari kontak berdasarkan nama/nomor.\ncontoh : \`#listkontak budi\` atau \`#listkontak 62812\``,
+  contactSearchResult: (query, count, list) =>
+    `Hasil pencarian "*${query}*" (${count} kontak, maksimal 20 ditampilkan) :\n\n${list}`,
+  contactSearchEmpty: (query) =>
+    `Tidak ada kontak yang cocok dengan "*${query}*".`,
 
   // auto kick story
   kickTagMsg: (n) => `@${n} terdeteksi tag grup di story, kamu akan dikick.`,

@@ -2,3 +2,4 @@ node_modules
 sessions
 package-lock.json
 .zcode/
+contacts.json

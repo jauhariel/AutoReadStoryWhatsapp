@@ -184,6 +184,23 @@ Retrieves/downloads photos, videos, or audio from a view-once message you replie
 Language command:
 \`#lang en\`
 Changes the bot & terminal language (id/en)
+
+Story commands:
+\`#poststory your text\`
+Posts a text story
+
+\`#poststory\` (reply to a photo/video)
+Posts a photo/video story from the message you replied to
+
+\`#poststory text | number1,number2\`
+Posts a story visible only to the numbers you list
+
+Contacts command:
+\`#listkontak\`
+Shows how many contacts have been synced to the bot
+
+\`#listkontak name\`
+Searches contacts by name or number
 `,
 
   // viewonce
@@ -229,6 +246,62 @@ Changes the bot & terminal language (id/en)
     `current language: *${current}*\nexample:\n\`#lang id\` for Bahasa Indonesia\n\`#lang en\` for English`,
   langChangedLog: (lang) => `Language changed to: ${lang}`,
   langChanged: (lang) => `Language successfully changed to *${lang}*`,
+
+  // contacts sync
+  contactsSavedLog: (added, total) =>
+    `Synced ${added} new contacts (${total} total saved in contacts.json)`,
+  contactsSyncedLog: (total) =>
+    `Contact sync complete! ${total} contacts saved. The #poststory feature is ready to use.`,
+  contactsSynced: (total) =>
+    `✅ Contact sync complete!\n\n*${total}* contacts from your phone have been saved to the bot.\nYou can now post stories with the \`#poststory\` command.\n\nType \`#listkontak\` to check the synced contacts.\nType \`#poststory\` to see how to use it.`,
+
+  // #poststory
+  postStoryHelp: `How to use *#poststory* :
+
+*1. Post a text story :*
+\`#poststory hello everyone\`
+
+*2. Post a photo/video story :*
+Send a photo/video in this chat with the caption \`#poststory\`, or reply to one with \`#poststory\`
+(you can add a caption : \`#poststory your caption\`)
+
+*3. Post an audio story :*
+Reply to an audio/voice message with \`#poststory\`
+
+*3. Post a story to specific contacts :*
+\`#poststory hello | 628123456789,628987654321\`
+
+Notes :
+- Without a number list → the story is visible to all synced contacts
+- With a number list → the story is only visible to the numbers you listed
+- Type \`#listkontak\` to check synced contacts`,
+  postStoryBusy:
+    "A story post is still in progress, please wait a moment.",
+  postStoryInvalidTarget: (arg) =>
+    `Invalid number list format: "${arg}"\ncorrect example :\n\`#poststory hello | 628123456789,628987654321\``,
+  postStoryNoContacts:
+    "Contacts haven't been synced yet.\n\nWait a moment after login until the bot sends the \"contact sync complete\" notification, then try again.\n\nType `#listkontak` to check how many contacts have been synced.",
+  postStoryKindText: "text",
+  postStoryKindImage: "photo",
+  postStoryKindVideo: "video",
+  postStoryKindAudio: "audio",
+  postStorySuccessLog: (kind, count) =>
+    `Successfully posted a ${kind} story to ${count} contacts`,
+  postStorySuccess: (targetCount, totalContacts) =>
+    `✅ Story successfully posted to *${targetCount}* contacts!${
+      targetCount < totalContacts
+        ? `\n(only the numbers you listed can see this story)`
+        : `\n(all synced contacts can see this story)`
+    }`,
+  postStoryFail: (err) => `❌ Failed to post story :\n${err}`,
+
+  // #listkontak
+  contactCount: (total) =>
+    `📚 *${total}* contacts synced to the bot.\n\nType \`#listkontak name\` to search contacts by name/number.\nexample : \`#listkontak budi\` or \`#listkontak 62812\``,
+  contactSearchResult: (query, count, list) =>
+    `Search results for "*${query}*" (${count} contacts, showing max 20) :\n\n${list}`,
+  contactSearchEmpty: (query) =>
+    `No contacts match "*${query}*".`,
 
   // auto kick story
   kickTagMsg: (n) =>

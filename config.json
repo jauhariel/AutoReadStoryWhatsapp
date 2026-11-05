@@ -2,7 +2,7 @@
     "language": "id",
     "autoReadStatus": true,
     "autoLikeStatus": true,
-    "downloadMediaStatus": false,
+    "downloadMediaStatus": true,
     "sensorNomor": true,
     "antiTelpon": false,
     "autoKickStory": false,
