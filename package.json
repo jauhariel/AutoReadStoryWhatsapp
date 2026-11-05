@@ -14,7 +14,7 @@
   ],
   "author": "github.com/jauhariel",
   "license": "ISC",
-  "description": "Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu untuk melihat status/story teman-teman WhatsApp secara otomatis, sehingga kamu menjadi orang pertama yang melihat story mereka.",
+  "description": "Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view, like, and download your WhatsApp contacts' statuses, so you can be the first to see and like their stories.",
   "dependencies": {
     "@whiskeysockets/baileys": "latest",
     "colors": "^1.4.0",

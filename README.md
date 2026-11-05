@@ -27,6 +27,7 @@ Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view
 8. **Whitelist**: Configure specific numbers whose statuses will be the only ones viewed.
 9. **Emojis**: Configure the emojis used to like statuses.
 10. **View Once**: Retrieve/download photos, videos, and audio from view-once messages.
+11. **Multi-language**: Switch the bot & terminal language with `#lang` (`id`/`en`).
 
 ## Installation :
 
@@ -81,6 +82,7 @@ Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view
 
 ```js
    {
+    "language": "id", // bot & terminal language: "id" (Indonesian) or "en" (English)
     "autoReadStatus": true, // set to false if you don't want statuses to be viewed automatically
     "autoLikeStatus": true, // set to false if you don't want statuses to be liked automatically
     "downloadMediaStatus": false, // set to true if you want to download media (photos, videos, audio) from statuses
@@ -116,8 +118,10 @@ Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view
 
 9. Edit the <strong>emojis</strong> array in the <strong>config.json</strong> file to configure the emojis used to like statuses. You can add or change the emojis however you like.
 
-10. Press <strong>CTRL</strong> and <strong>C</strong> on your keyboard at the same time to stop the bot!
-11. Delete the <strong>sessions</strong> folder if you want to log in with a different number, or if you run into login issues such as getting stuck while connecting, then start it again with:
+10. Type <strong>#lang en</strong> or <strong>#lang id</strong> in the bot's chat to switch the bot & terminal language. On the first run, the terminal will also ask you to pick a language.
+
+11. Press <strong>CTRL</strong> and <strong>C</strong> on your keyboard at the same time to stop the bot!
+12. Delete the <strong>sessions</strong> folder if you want to log in with a different number, or if you run into login issues such as getting stuck while connecting, then start it again with:
 
 ```bash
 npm start

@@ -1,3 +1,5 @@
+🌐 **[English](README.md)**
+
 # Auto Read Story Whatsapp
 
 Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu melihat, menyukai, dan mendownload status/story teman-teman WhatsAppmu secara otomatis, sehingga kamu menjadi orang pertamax yang melihat dan menyukai storynyaw.
@@ -25,6 +27,7 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
 8. **Whitelist**: Mengatur hanya nomor tertentu yang statusnya akan dilihat.
 9. **Emojis**: Mengatur emoji yang digunakan untuk menyukai status.
 10. **View Once**: Mengambil/mendownload foto, video, audio dari pesan yang hanya dapat dilihat sekali.
+11. **Multi Bahasa**: Mengubah bahasa pesan bot dan terminal dengan `#lang` (`id`/`en`).
 
 ## Instalasi :
 
@@ -79,6 +82,7 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
 
 ```js
    {
+    "language": "id", // bahasa pesan bot & terminal: "id" (Indonesia) atau "en" (Inggris)
     "autoReadStatus": true, // ubah jadi false jika tidak ingin otomatis melihat status
     "autoLikeStatus": true, // ubah jadi false jika tidak ingin otomatis menyukai status
     "downloadMediaStatus": false, // ubah jadi true jika ingin mendownload media(foto, video, audio) dari status
@@ -114,8 +118,10 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
 
 9. Ubah nilai <strong>emojis</strong> yang terdapat di file <strong>config.json</strong> untuk mengatur emoji yang digunakan untuk menyukai status. Kamu bisa menambahkan atau mengubah emoji sesuai keinginan.
 
-10. Klik <strong>CTRL</strong> dan <strong>C</strong> pada keyboard secara bersamaan untuk memberhentikan bot!
-11. Hapus folder <strong>sessions</strong> jika ingin login dengan nomor lain atau jika terjadi masalah login, seperti stuck di 'menghubungkan ke wangsaf', lalu jalankan ulang dengan mengetik:
+10. Ketik <strong>#lang en</strong> atau <strong>#lang id</strong> di chat bot untuk mengubah bahasa pesan bot dan terminal. Saat pertama kali dijalankan, terminal juga akan menanyakan pilihan bahasa.
+
+11. Klik <strong>CTRL</strong> dan <strong>C</strong> pada keyboard secara bersamaan untuk memberhentikan bot!
+12. Hapus folder <strong>sessions</strong> jika ingin login dengan nomor lain atau jika terjadi masalah login, seperti stuck di 'menghubungkan ke wangsaf', lalu jalankan ulang dengan mengetik:
 
 ```bash
 npm start
