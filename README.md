@@ -95,8 +95,6 @@ After logging in, the bot automatically syncs your phone's contact list into the
    ```
    The story will only be visible to the numbers you listed (like WhatsApp's "Share with selected contacts" feature). Without a number list, the story is visible to all synced contacts.
 5. **Check your contacts** — type `#listkontak` to see how many contacts have been synced, or `#listkontak budi` / `#listkontak 62812` to search contacts by name/number.
-
-Note: the <strong>contacts.json</strong> file contains your private contact list and will not be pushed to the repository (it's in .gitignore).
 <hr>
 
 ## Notes

@@ -95,8 +95,6 @@ Setelah login, bot akan otomatis mensinkronkan daftar kontak HP kamu ke file <st
    ```
    Story hanya akan terlihat oleh nomor yang kamu daftarkan (seperti fitur "Bagikan dengan kontak pilihanku" di WhatsApp). Tanpa daftar nomor, story terlihat oleh semua kontak yang tersinkron.
 5. **Cek daftar kontak** — ketik `#listkontak` untuk melihat jumlah kontak yang sudah tersinkron, atau `#listkontak budi` / `#listkontak 62812` untuk mencari kontak berdasarkan nama/nomor.
-
-Catatan: file <strong>contacts.json</strong> berisi daftar kontak pribadi kamu dan tidak akan ikut ter-push ke repository (sudah masuk .gitignore).
 <hr>
 
 ## Catatan
