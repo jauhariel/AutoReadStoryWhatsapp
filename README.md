@@ -1,96 +1,98 @@
-# Auto Read Story Whatsapp
+🌐 **[Bahasa Indonesia](README.id.md)**
 
-Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu melihat, menyukai, dan mendownload status/story teman-teman WhatsAppmu secara otomatis, sehingga kamu menjadi orang pertamax yang melihat dan menyukai storynyaw.
+# Auto Read Story WhatsApp
+
+Auto Read Story/Status WhatsApp is a simple bot that lets you automatically view, like, and download your WhatsApp contacts' statuses — so you can be the first to see and like their stories.
 
 <div align="center">
   <img src="img/testing.jpg" alt="testing" width="500">
-  <div>Melihat dan menyukai story secara otomatis</div>
+  <div>Automatically viewing and liking statuses</div>
   <br>
   <img src="img/testing2.jpeg" alt="testing" width="500">
-  <div>Mendownload media(foto, video, dan audio) dari story secara otomatis jika fitur downloadMediaStatus diaktifkan</div>
+  <div>Automatically downloading media (photos, videos, and audio) from statuses when the downloadMediaStatus feature is enabled</div>
   <br>
   <img src="img/testing3.jpeg" alt="testing" width="500">
-  <div>Terdapat beberapa perintah (command) untuk mengaktifkan atau menonaktifkan fitur yang tersedia dengan mengetik #menu.</div>
+  <div>Several commands are available to turn features on or off — just type #menu.</div>
 </div>
 
-## Fitur:
+## Features:
 
-1. **Auto Read Status**: Melihat status secara otomatis jika fitur ini diaktifkan.
-2. **Auto Like Status**: Menyukai status secara otomatis jika fitur ini diaktifkan.
-3. **Download Media**: Mendownload media (foto, video, audio) dari status secara otomatis jika fitur ini diaktifkan.
-4. **Sensor Nomor**: Menyensor nomor yang ada di dalam status jika fitur ini diaktifkan.
-5. **Anti-Telpon**: Menolak panggilan telepon secara otomatis jika fitur ini diaktifkan.
-6. **Auto Kick Story Grup**: Kick/mengeluarkan member yang terdeteksi mentag grup di story mereka.
-7. **Blacklist**: Mengatur hanya nomor tertentu yang statusnya tidak akan dilihat.
-8. **Whitelist**: Mengatur hanya nomor tertentu yang statusnya akan dilihat.
-9. **Emojis**: Mengatur emoji yang digunakan untuk menyukai status.
-10. **View Once**: Mengambil/mendownload foto, video, audio dari pesan yang hanya dapat dilihat sekali.
+1. **Auto Read Status**: Automatically views statuses when this feature is enabled.
+2. **Auto Like Status**: Automatically likes statuses when this feature is enabled.
+3. **Download Media**: Automatically downloads media (photos, videos, audio) from statuses when this feature is enabled.
+4. **Number Masking**: Masks the phone numbers shown in statuses when this feature is enabled.
+5. **Anti-Call**: Automatically rejects incoming calls when this feature is enabled.
+6. **Auto Kick Group Story**: Kicks/removes members detected tagging a group in their story.
+7. **Blacklist**: Configure specific numbers whose statuses will never be viewed.
+8. **Whitelist**: Configure specific numbers whose statuses will be the only ones viewed.
+9. **Emojis**: Configure the emojis used to like statuses.
+10. **View Once**: Retrieve/download photos, videos, and audio from view-once messages.
 
-## Instalasi :
+## Installation :
 
 ### Windows
 
-1. Nodejs :<br>
-   https://nodejs.org/id
-2. Git :<br>
+1. Node.js:<br>
+   https://nodejs.org/en
+2. Git:<br>
    https://git-scm.com/downloads
 
 ### Ubuntu/Debian
 
-1. Nodejs :
+1. Node.js:
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && nvm install 22
    ```
-2. Git :
+2. Git:
    ```bash
    sudo apt update && sudo apt install -y git
    ```
 
 ### Termux (Android)
 
-1. Nodejs + git :
+1. Node.js + Git:
    ```bash
    pkg update && pkg install git nodejs-lts
    ```
 
-## Cara menjalankan bot :
+## How to run the bot :
 
-1. Buka Terminal kesayangan kalian (⁠ ⁠╹⁠▽⁠╹⁠ ⁠) 👍
-2. Clone repository dengan mengetik:
+1. Open your favorite terminal (⁠ ⁠╹⁠▽⁠╹⁠ ⁠) 👍
+2. Clone the repository:
    ```bash
    git clone https://github.com/jauhariel/AutoReadStoryWhatsapp.git
    ```
-3. Masuk ke dalam folder repository dengan mengetik:
+3. Move into the project folder:
    ```bash
    cd AutoReadStoryWhatsapp
    ```
-4. Instal dependensi yang diperlukan dengan mengetik:
+4. Install the required dependencies:
    ```bash
    npm i
    ```
-5. Jalankan bot dengan mengetik:
+5. Start the bot:
    ```bash
    npm start
    ```
 6. Enjoy
 <hr>
 
-## Catatan
+## Notes
 
 ```js
    {
-    "autoReadStatus": true, // ubah jadi false jika tidak ingin otomatis melihat status
-    "autoLikeStatus": true, // ubah jadi false jika tidak ingin otomatis menyukai status
-    "downloadMediaStatus": false, // ubah jadi true jika ingin mendownload media(foto, video, audio) dari status
-    "sensorNomor": true, // ubah jadi false jika tidak ingin menyensor nomor yang ada di dalam status
-    "antiTelpon": false, // ubah jadi true jika ingin mengaktifkan fitur anti-telepon
-    "autoKickStory": false, // ubah jadi true jika ingin mengaktifkan fitur kick tag grup story
-    "blackList": [ // nomor yang ada di dalam array ini tidak akan dilihat statusnya
+    "autoReadStatus": true, // set to false if you don't want statuses to be viewed automatically
+    "autoLikeStatus": true, // set to false if you don't want statuses to be liked automatically
+    "downloadMediaStatus": false, // set to true if you want to download media (photos, videos, audio) from statuses
+    "sensorNomor": true, // set to false if you don't want phone numbers in statuses to be masked
+    "antiTelpon": false, // set to true to enable the anti-call feature
+    "autoKickStory": false, // set to true to enable the group-story-tag kick feature
+    "blackList": [ // statuses from numbers in this array will NOT be viewed
         "628987654321",
         "628123456789"
     ],
-    "whiteList": [], // jika array ini tidak kosong, hanya nomor yang ada di dalam array ini yang akan dilihat statusnya
-    "emojis": [ // mengatur emoji yang digunakan untuk menyukai status
+    "whiteList": [], // if this array is not empty, only statuses from numbers in this array will be viewed
+    "emojis": [ // configure the emojis used to like statuses
         "💚",
         "❤️",
         "👍"
@@ -98,24 +100,24 @@ Auto Read Story/Status WhatsApp adalah bot sederhana yang memungkinkan kamu meli
    }
 ```
 
-1. Kamu bisa menambahkan nomor yang tidak ingin kamu lihat story-nya secara otomatis di file <strong>config.json</strong> dengan menambahkan nomor pada array <strong>blackList</strong>.
-2. Kamu bisa menambahkan hanya nomor tertentu yang ingin kamu lihat story-nya secara otomatis di file <strong>config.json</strong> dengan menambahkan nomor pada array <strong>whiteList</strong>.
-3. Jika kamu ingin melihat story dari semua kontak, kosongkan array <strong>blackList</strong> dan <strong>whiteList</strong> yang ada di file <strong>config.json</strong>.
+1. You can stop specific numbers' statuses from being viewed automatically by adding them to the <strong>blackList</strong> array in the <strong>config.json</strong> file.
+2. You can make only specific numbers' statuses be viewed automatically by adding them to the <strong>whiteList</strong> array in the <strong>config.json</strong> file.
+3. If you want to view statuses from all contacts, empty both the <strong>blackList</strong> and <strong>whiteList</strong> arrays in the <strong>config.json</strong> file.
 
-4. Ubah nilai <strong>autoReadStatus</strong> yang terdapat di file <strong>config.json</strong> menjadi false untuk menonaktifkan fitur auto-read pada status, atau ubah menjadi true untuk mengaktifkannya.
+4. Set <strong>autoReadStatus</strong> in the <strong>config.json</strong> file to false to disable auto-reading of statuses, or true to enable it.
 
-5. Ubah nilai <strong>autoLikeStatus</strong> yang terdapat di file <strong>config.json</strong> menjadi false untuk menonaktifkan fitur auto-like pada status, atau ubah menjadi true untuk mengaktifkannya.
+5. Set <strong>autoLikeStatus</strong> in the <strong>config.json</strong> file to false to disable auto-liking of statuses, or true to enable it.
 
-6. Ubah nilai <strong>downloadMediaStatus</strong> yang terdapat di file <strong>config.json</strong> menjadi true untuk secara otomatis mendownload media (foto, video, audio) dari status, atau ubah menjadi false untuk menonaktifkan fitur tersebut.
+6. Set <strong>downloadMediaStatus</strong> in the <strong>config.json</strong> file to true to automatically download media (photos, videos, audio) from statuses, or false to disable it.
 
-7. Ubah nilai <strong>antiTelpon</strong> yang terdapat di file <strong>config.json</strong> menjadi true untuk mengaktifkan fitur anti-telepon, atau ubah menjadi false untuk menonaktifkannya.
+7. Set <strong>antiTelpon</strong> in the <strong>config.json</strong> file to true to enable the anti-call feature, or false to disable it.
 
-8. Ubah nilai <strong>autoKickStory</strong> yang terdapat di file <strong>config.json</strong> menjadi true untuk mengaktifkan fitur kick member yg terdeteksi tag grup di story mereka, atau ubah menjadi false untuk menonaktifkannya.
+8. Set <strong>autoKickStory</strong> in the <strong>config.json</strong> file to true to enable kicking members detected tagging a group in their story, or false to disable it.
 
-9. Ubah nilai <strong>emojis</strong> yang terdapat di file <strong>config.json</strong> untuk mengatur emoji yang digunakan untuk menyukai status. Kamu bisa menambahkan atau mengubah emoji sesuai keinginan.
+9. Edit the <strong>emojis</strong> array in the <strong>config.json</strong> file to configure the emojis used to like statuses. You can add or change the emojis however you like.
 
-10. Klik <strong>CTRL</strong> dan <strong>C</strong> pada keyboard secara bersamaan untuk memberhentikan bot!
-11. Hapus folder <strong>sessions</strong> jika ingin login dengan nomor lain atau jika terjadi masalah login, seperti stuck di 'menghubungkan ke wangsaf', lalu jalankan ulang dengan mengetik:
+10. Press <strong>CTRL</strong> and <strong>C</strong> on your keyboard at the same time to stop the bot!
+11. Delete the <strong>sessions</strong> folder if you want to log in with a different number, or if you run into login issues such as getting stuck while connecting, then start it again with:
 
 ```bash
 npm start
