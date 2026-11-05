@@ -6,12 +6,12 @@ module.exports = {
   pairingQuestion:
     "\nApakah kamu ingin menggunakan pairing code untuk login ke wangsaf? (y/n): ",
   enterNumberNote:
-    "Wokeh kalau gitu silahkan masukkan nomor wangsafmu!\ncatatan : awali dengan 62 contoh 628123456789",
+    "Wokeh kalau gitu silahkan masukkan nomor wangsafmu!\ncatatan : gunakan format internasional lengkap dengan kode negara, contoh 628123456789",
   enterNumberPrompt: "\nMasukkan nomor wangsaf Anda: ",
   numberDigitsOnly:
     "Nomor harus berupa angka!\nSilakan masukkan nomor wangsaf kembali!.",
-  numberStartsWith62:
-    "Nomor harus diawali dengan 62!\nContoh : 628123456789\nSilakan masukkan nomor wangsaf kembali!.",
+  numberIntlFormat:
+    "Nomor harus menggunakan format internasional lengkap dengan kode negara!\nContoh : Indonesia 628123456789, Malaysia 60123456789\nSilakan masukkan nomor wangsaf kembali!.",
   pairingCodeNotice: "\nCek notifikasi wangsafmu dan masukin kode login wangsaf:",
   qrInstructions:
     "Buka wangsafmu lalu klik titik tiga di kanan atas kemudian klik perangkat tertaut setelah itu Silahkan scan QR code dibawah untuk login ke wangsaf",

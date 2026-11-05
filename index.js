@@ -93,10 +93,8 @@ async function connectToWhatsApp() {
         .cyan.bold,
     );
     rl.question("Ketik 1 atau 2 / Type 1 or 2: ".yellow.bold, (answer) => {
-      if (answer.trim() === "2") {
-        lang = "en";
-        updateConfig("language", lang);
-      }
+      lang = answer.trim() === "2" ? "en" : "id";
+      updateConfig("language", lang);
       logCuy(t("langChangedLog", lang), "blue");
       logCuy(t("loginPrompt"), "cyan"); // pesan untuk yang menggunakan panel
       askPairingCode();
@@ -114,9 +112,6 @@ async function connectToWhatsApp() {
                 async (waNumber) => {
                   if (!/^\d+$/.test(waNumber)) {
                     logCuy(t("numberDigitsOnly"), "red");
-                    askWaNumber();
-                  } else if (!waNumber.startsWith("62")) {
-                    logCuy(t("numberStartsWith62"), "red");
                     askWaNumber();
                   } else {
                     const code = await sock.requestPairingCode(

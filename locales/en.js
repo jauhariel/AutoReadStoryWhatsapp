@@ -6,12 +6,12 @@ module.exports = {
   pairingQuestion:
     "\nWould you like to use a pairing code to log in to WhatsApp? (y/n): ",
   enterNumberNote:
-    "Alright, please enter your WhatsApp number!\nnote : start with 62, e.g. 628123456789",
+    "Alright, please enter your WhatsApp number!\nnote : use the full international format with the country code, e.g. 628123456789",
   enterNumberPrompt: "\nEnter your WhatsApp number: ",
   numberDigitsOnly:
     "The number must contain digits only!\nPlease enter your WhatsApp number again.",
-  numberStartsWith62:
-    "The number must start with 62!\nExample : 628123456789\nPlease enter your WhatsApp number again.",
+  numberIntlFormat:
+    "The number must use the full international format with the country code!\nExample : Indonesia 628123456789, Malaysia 60123456789\nPlease enter your WhatsApp number again.",
   pairingCodeNotice: "\nCheck your WhatsApp notifications and enter this login code:",
   qrInstructions:
     "Open WhatsApp, tap the three dots in the top right corner, then tap Linked devices. After that, scan the QR code below to log in to WhatsApp",
